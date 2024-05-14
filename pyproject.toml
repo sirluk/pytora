@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pytora"
+version = "0.0.1"
+authors = [
+  { name="Lukas Hauzenberger", email="lukas.hauzenberger@gmail.com" },
+]
+description = "A minimal PyTorch implementation of LoRA"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = ["torch>=1.9.0"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
