@@ -1,10 +1,11 @@
 import torch
 from torch import nn
 from torch.nn.utils.parametrize import register_parametrization, remove_parametrizations
-from lora_layer import LoraLayer
 from transformers import Conv1D
 from functools import partial
 from collections import OrderedDict
+
+from .lora_layer import LoraLayer
 
 from typing import Optional
 
