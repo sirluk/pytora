@@ -1,13 +1,18 @@
 import torch
 from torch import nn
 from torch.nn.utils.parametrize import register_parametrization, remove_parametrizations
-from transformers import Conv1D
+import importlib
 from functools import partial
 from collections import OrderedDict
 
 from .lora_layer import LoraLayer
 
 from typing import Optional
+
+
+_TRANSFORMERS_AVAILABLE = importlib.util.find_spec("transformers") is not None
+if _TRANSFORMERS_AVAILABLE:
+    from transformers import Conv1D
 
 
 def module_name_check(
@@ -43,26 +48,27 @@ def apply_lora(
 
     for name, module in model.named_modules():
         
-        if type(module) == torch.nn.Linear and check(name):
-            l = LoraLayer(
-                weight = module.weight,
-                r = lora_r,
-                alpha = lora_alpha,
-                dropout_prob = lora_dropout
-            )
-            register_parametrization(module, "weight", l)
-            module.weight.requires_grad = False
-        # same as linear layer, was implemented to keep gpt2 style
-        elif type(module) == Conv1D and check(name):
-            l = LoraLayer(
-                weight = module.weight,
-                r = lora_r,
-                alpha = lora_alpha,
-                dropout_prob = lora_dropout,
-                fan_in_fan_out = True
-            )
-            register_parametrization(module, "weight", l)
-            module.weight.requires_grad = False
+        if check(name):
+            if type(module) == torch.nn.Linear:
+                l = LoraLayer(
+                    weight = module.weight,
+                    r = lora_r,
+                    alpha = lora_alpha,
+                    dropout_prob = lora_dropout
+                )
+                register_parametrization(module, "weight", l)
+                module.weight.requires_grad = False
+            elif _TRANSFORMERS_AVAILABLE and type(module) == Conv1D:
+                # same as linear layer, was implemented to keep gpt2 style
+                l = LoraLayer(
+                    weight = module.weight,
+                    r = lora_r,
+                    alpha = lora_alpha,
+                    dropout_prob = lora_dropout,
+                    fan_in_fan_out = True
+                )
+                register_parametrization(module, "weight", l)
+                module.weight.requires_grad = False
 
 
 @torch.no_grad()
